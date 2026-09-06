@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComicShop — Sua Loja de Quadrinhos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --pink: #f72585;
+            --purple: #7209b7;
+            --violet: #560bad;
+            --blue: #3a0ca3;
+            --cyan: #4cc9f0;
+            --green: #06d6a0;
+            --bg: #07080f;
+            --surface: #0d0f1a;
+            --surface2: #131626;
+            --border: rgba(255,255,255,0.07);
+            --text: #e8eaf6;
+            --muted: #6b7280;
+            --font-display: 'Syne', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            font-family: var(--font-display);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
+
+        /* ── Layout ── */
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 240px;
+            flex-shrink: 0;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            z-index: 30;
+            transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 36px;
+            padding: 0 8px;
+        }
+
+        .logo-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 0 20px rgba(247,37,133,0.4);
+            flex-shrink: 0;
+        }
+
+        .logo-text { line-height: 1.1; }
+        .logo-text h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.5px; }
+        .logo-text p { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
+
+        .nav-section { margin-bottom: 8px; }
+        .nav-label {
+            font-size: 9px;
+            font-family: var(--font-mono);
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 0 12px;
+            margin-bottom: 6px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(247,37,133,0.15), rgba(114,9,183,0.15));
+            color: var(--text);
+            border: 1px solid rgba(247,37,133,0.25);
+        }
+        .nav-item i { width: 16px; text-align: center; font-size: 12px; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .wallet-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .wallet-label { font-size: 10px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 4px; }
+
+        .wallet-amount {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: var(--font-mono);
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-family: var(--font-mono);
+            color: var(--green);
+            padding: 8px 12px;
+            background: rgba(6,214,160,0.07);
+            border: 1px solid rgba(6,214,160,0.2);
+            border-radius: 6px;
+        }
+
+        .pulse-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(6,214,160,0); }
+        }
+
+        /* ── Main ── */
+        .main { flex: 1; margin-left: 240px; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* ── Topbar ── */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(7, 8, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 14px;
+            width: 280px;
+            transition: border-color 0.2s;
+        }
+
+        .search-bar:focus-within { border-color: rgba(247,37,133,0.5); }
+        .search-bar i { color: var(--muted); font-size: 12px; }
+
+        .search-bar input {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-size: 13px;
+            font-family: var(--font-display);
+            width: 100%;
+        }
+
+        .search-bar input::placeholder { color: var(--muted); }
+
+        .icon-btn {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+        .badge {
+            position: absolute;
+            top: -4px; right: -4px;
+            min-width: 16px; height: 16px;
+            background: var(--pink);
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 3px;
+            display: none;
+        }
+
+        .user-btn {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            color: white;
+            font-family: var(--font-mono);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .user-btn:hover { transform: scale(1.05); box-shadow: 0 0 16px rgba(247,37,133,0.4); }
+
+        /* ── Page sections ── */
+        .page { display: none; padding: 32px; }
+        .page.active { display: block; }
+
+        /* ── Hero ── */
+        .hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            padding: 48px;
+            margin-bottom: 32px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(247,37,133,0.2), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; left: 20%;
+            width: 250px; height: 250px;
+            background: radial-gradient(circle, rgba(114,9,183,0.2), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(6,214,160,0.1);
+            border: 1px solid rgba(6,214,160,0.25);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--green);
+            margin-bottom: 20px;
+        }
+
+        .hero h2 {
+            font-size: clamp(32px, 4vw, 52px);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+        }
+
+        .grad-text {
+            background: linear-gradient(135deg, var(--pink) 0%, var(--cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 15px;
+            max-width: 480px;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: var(--font-display);
+        }
+
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(247,37,133,0.35); }
+
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: var(--font-display);
+        }
+
+        .btn-ghost:hover { background: rgba(255,255,255,0.08); }
+
+        /* ── Stats ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .stat-card:hover { border-color: rgba(247,37,133,0.3); }
+        .stat-label { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-size: 26px; font-weight: 800; font-family: var(--font-mono); }
+        .stat-value.green { color: var(--green); }
+
+        /* ── Section header ── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-title { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+        .section-sub { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-top: 2px; }
+
+        .live-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--green);
+            background: rgba(6,214,160,0.08);
+            border: 1px solid rgba(6,214,160,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+
+        /* ── Products grid ── */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 16px;
+        }
+
+        .product-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.25s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            border-color: rgba(247,37,133,0.45);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(247,37,133,0.12);
+        }
+
+        .product-thumb {
+            height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 52px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+
+        .out-of-stock-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(7,8,15,0.65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .oos-badge {
+            background: rgba(239,68,68,0.2);
+            border: 1px solid rgba(239,68,68,0.4);
+            color: #ef4444;
+            font-size: 10px;
+            font-family: var(--font-mono);
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .product-body { padding: 16px; }
+        .product-cat { font-size: 10px; font-family: var(--font-mono); color: var(--pink); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .product-name { font-size: 15px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.3px; }
+
+        .stars { display: flex; gap: 2px; align-items: center; margin-bottom: 4px; }
+        .star { font-size: 11px; color: #4b5563; }
+        .star.filled { color: #fbbf24; }
+        .rating-text { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-left: 4px; }
+
+        .review-count { font-size: 10px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 12px; }
+
+        .product-footer { display: flex; align-items: center; justify-content: space-between; }
+
+        .product-price {
+            font-size: 22px;
+            font-weight: 800;
+            font-family: var(--font-mono);
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .add-btn {
+            width: 34px; height: 34px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            border: none;
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            font-size: 13px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .add-btn:hover { transform: scale(1.1); box-shadow: 0 4px 12px rgba(247,37,133,0.4); }
+        .add-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ── Feature cards ── */
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            transition: all 0.25s;
+        }
+
+        .feature-card:hover { border-color: rgba(247,37,133,0.3); }
+
+        .feature-icon {
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+
+        .feature-icon.pink { background: rgba(247,37,133,0.12); color: var(--pink); }
+        .feature-icon.purple { background: rgba(114,9,183,0.12); color: #9f7aea; }
+        .feature-icon.green { background: rgba(6,214,160,0.1); color: var(--green); }
+
+        .feature-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .feature-card p { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+        /* ── Orders page ── */
+        .orders-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .order-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .order-card:hover { border-color: rgba(247,37,133,0.3); }
+        .order-id { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+        .order-info { flex: 1; }
+        .order-items { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .order-meta { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+
+        .order-total {
+            font-size: 18px;
+            font-weight: 800;
+            font-family: var(--font-mono);
+            color: var(--pink);
+        }
+
+        .status-badge {
+            font-size: 10px;
+            font-family: var(--font-mono);
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-pending { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+        .status-processing { background: rgba(76,201,240,0.1); color: var(--cyan); border: 1px solid rgba(76,201,240,0.25); }
+        .status-completed { background: rgba(6,214,160,0.1); color: var(--green); border: 1px solid rgba(6,214,160,0.2); }
+        .status-cancelled { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+
+        /* ── Modals ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 18px;
+            padding: 32px;
+            width: 100%;
+            max-width: 440px;
+            margin: 16px;
+            position: relative;
+            animation: modal-in 0.25s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        @keyframes modal-in {
+            from { opacity: 0; transform: scale(0.94) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px; right: 16px;
+            width: 30px; height: 30px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+        .modal h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 24px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-label { font-size: 11px; font-family: var(--font-mono); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+
+        .form-input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 11px 14px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: var(--font-display);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus { border-color: var(--pink); }
+
+        select.form-input option { background: var(--surface2); }
+
+        .form-input::placeholder { color: var(--muted); }
+
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+
+        .btn-block {
+            width: 100%;
+            padding: 13px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: var(--font-display);
+            transition: all 0.2s;
+        }
+
+        .btn-block.primary {
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            border: none;
+            color: white;
+        }
+
+        .btn-block.primary:hover { opacity: 0.92; transform: translateY(-1px); }
+
+        .btn-block.secondary {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-block.secondary:hover { background: rgba(255,255,255,0.08); }
+
+        /* ── Cart drawer ── */
+        .cart-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px);
+        }
+
+        .cart-overlay.open { display: block; }
+
+        .cart-drawer {
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: 380px;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 28px;
+            z-index: 51;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+        }
+
+        .cart-overlay.open + .cart-drawer,
+        .cart-drawer.open {
+            transform: translateX(0);
+        }
+
+        .cart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .cart-title { font-size: 18px; font-weight: 800; }
+        .cart-count { font-size: 11px; font-family: var(--font-mono); color: var(--muted); }
+
+        .cart-items { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; }
+
+        .cart-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .cart-item-emoji { font-size: 28px; flex-shrink: 0; }
+        .cart-item-info { flex: 1; min-width: 0; }
+        .cart-item-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cart-item-price { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+
+        .qty-controls { display: flex; align-items: center; gap: 6px; }
+
+        .qty-btn {
+            width: 24px; height: 24px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px;
+            transition: background 0.15s;
+        }
+
+        .qty-btn:hover { background: rgba(255,255,255,0.12); }
+        .qty-val { font-family: var(--font-mono); font-size: 13px; min-width: 16px; text-align: center; }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .remove-btn:hover { color: #ef4444; }
+
+        .cart-footer { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 16px; }
+        .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .cart-total-label { font-size: 13px; color: var(--muted); font-family: var(--font-mono); }
+        .cart-total-val { font-size: 22px; font-weight: 800; font-family: var(--font-mono); color: var(--pink); }
+
+        .empty-cart { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--muted); }
+        .empty-cart i { font-size: 36px; opacity: 0.3; }
+        .empty-cart p { font-size: 13px; font-family: var(--font-mono); }
+
+        /* ── Success modal ── */
+        .success-icon {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: rgba(6,214,160,0.1);
+            border: 2px solid rgba(6,214,160,0.35);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            color: var(--green);
+            margin: 0 auto 20px;
+        }
+
+        .order-summary {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin: 16px 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        .order-summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .order-summary-row:last-child { margin-bottom: 0; }
+        .order-summary-key { color: var(--muted); }
+        .order-summary-val { color: var(--text); }
+
+        /* ── Toasts ── */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            animation: toast-in 0.3s cubic-bezier(.34,1.56,.64,1), toast-out 0.3s ease 3.7s forwards;
+            pointer-events: all;
+            max-width: 320px;
+        }
+
+        @keyframes toast-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes toast-out { from { opacity: 1; } to { opacity: 0; transform: translateX(20px); } }
+
+        .toast.success { border-left: 3px solid var(--green); }
+        .toast.error { border-left: 3px solid #ef4444; }
+        .toast.info { border-left: 3px solid var(--cyan); }
+        .toast.success i { color: var(--green); }
+        .toast.error i { color: #ef4444; }
+        .toast.info i { color: var(--cyan); }
+
+        /* ── Loading skeleton ── */
+        .skeleton {
+            background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ── Footer ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 24px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        footer p { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+
+        .footer-links { display: flex; gap: 20px; }
+        .footer-links a { font-size: 12px; color: var(--muted); font-family: var(--font-mono); text-decoration: none; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--text); }
+
+        /* ── Auth tabs ── */
+        .auth-tabs { display: flex; gap: 0; margin-bottom: 24px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+        .auth-tab {
+            flex: 1; padding: 10px; text-align: center;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer;
+            background: none; border: none;
+            color: var(--muted);
+            font-family: var(--font-display);
+            transition: all 0.2s;
+        }
+        .auth-tab.active { background: rgba(247,37,133,0.15); color: var(--text); }
+
+        /* ── User menu ── */
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px;
+            min-width: 180px;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .user-dropdown.open { display: block; animation: modal-in 0.2s; }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .dropdown-item:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+        .dropdown-item.danger:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+        .dropdown-item i { width: 14px; font-size: 12px; }
+
+        .user-wrapper { position: relative; }
+
+        .dropdown-header {
+            padding: 10px 10px 8px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-header .dh-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+        .dropdown-header .dh-email { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .features-grid { grid-template-columns: 1fr; }
+            .cart-drawer { width: 100%; }
+            .search-bar { width: 180px; }
+        }
+
+        @media (max-width: 600px) {
+            .topbar { padding: 0 16px; }
+            .page { padding: 20px 16px; }
+            .hero { padding: 28px 20px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            footer { flex-direction: column; gap: 12px; text-align: center; }
+        }
+
+        /* ── Menu hamburger ── */
+        .hamburger { display: none; }
+        @media (max-width: 900px) { .hamburger { display: flex; } }
+
+        /* ── Overlay sidebar mobile ── */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 29;
+            background: rgba(0,0,0,0.5);
+        }
+        .sidebar-backdrop.open { display: block; }
+
+        /* ── Orders empty state ── */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 64px 0;
+            color: var(--muted);
+            gap: 12px;
+        }
+
+        .empty-state i { font-size: 48px; opacity: 0.2; }
+        .empty-state h3 { font-size: 16px; font-weight: 700; opacity: 0.6; }
+        .empty-state p { font-size: 13px; font-family: var(--font-mono); opacity: 0.5; }
+
+        /* ── Checkout encryption notice ── */
+        .encrypt-notice {
+            background: rgba(6,214,160,0.07);
+            border: 1px solid rgba(6,214,160,0.2);
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--green);
+            font-family: var(--font-mono);
+            margin-bottom: 16px;
+        }
+
+        /* Loading state for buttons */
+        .btn-loading { opacity: 0.7; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar backdrop (mobile) -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">C</div>
+            <div class="logo-text">
+                <h1>ComicShop</h1>
+                <p>marketplace v2</p>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-label">Menu</div>
+            <button class="nav-item active" onclick="navigateTo('home', this)">
+                <i class="fas fa-home"></i> Home
+            </button>
+            <button class="nav-item" onclick="navigateTo('products', this)">
+                <i class="fas fa-shopping-bag"></i> Products
+            </button>
+            <button class="nav-item" onclick="navigateTo('orders', this)">
+                <i class="fas fa-receipt"></i> My Orders
+            </button>
+        </div>
+
+        <div class="nav-section" style="margin-top: 8px;">
+            <div class="nav-label">Info</div>
+            <button class="nav-item">
+                <i class="fas fa-users"></i> Vendors
+            </button>
+            <button class="nav-item">
+                <i class="fas fa-question-circle"></i> FAQ
+            </button>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="wallet-card">
+                <div class="wallet-label">Wallet Balance</div>
+                <div class="wallet-amount" id="sidebarBalance">—</div>
+            </div>
+            <div class="status-bar">
+                <div class="pulse-dot"></div>
+                <span>Network encrypted</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="icon-btn hamburger" onclick="toggleSidebar()" title="Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search products..." id="searchInput" oninput="filterProducts()">
+                </div>
+            </div>
+            <div class="topbar-right">
+                <button class="icon-btn" onclick="openCart()" title="Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="badge" id="cartBadge">0</span>
+                </button>
+                <div class="user-wrapper">
+                    <button class="user-btn" id="userBtn" onclick="toggleUserMenu()" title="Account">L</button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header" id="dropdownHeader">
+                            <div class="dh-name" id="dropdownName">Guest</div>
+                            <div class="dh-email" id="dropdownEmail">Not signed in</div>
+                        </div>
+                        <div class="dropdown-item" onclick="navigateTo('orders'); closeUserMenu()">
+                            <i class="fas fa-receipt"></i> My Orders
+                        </div>
+                        <div class="dropdown-item" id="authDropdownItem" onclick="openLogin()">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Pages -->
+
+        <!-- HOME -->
+        <div class="page active" id="page-home">
+            <div class="hero">
+                <div class="hero-tag">
+                    <div class="pulse-dot"></div>
+                    Novidades toda semana
+                </div>
+                <h2>Bem-vindo à <span class="grad-text">ComicShop</span></h2>
+                <p>A loja mais completa de quadrinhos, mangás e HQs colecionáveis. Edições raras, lançamentos e clássicos, com entrega rápida e segura.</p>
+                <div class="hero-btns">
+                    <button class="btn-primary" onclick="navigateTo('products')">
+                        <i class="fas fa-shopping-bag"></i> Ver Catálogo
+                    </button>
+                    <button class="btn-ghost" onclick="navigateTo('orders')">
+                        <i class="fas fa-receipt"></i> My Orders
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Active Users</div>
+                    <div class="stat-value">1.2M+</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Vendors</div>
+                    <div class="stat-value">14.8K</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Transactions / day</div>
+                    <div class="stat-value">89K+</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Uptime</div>
+                    <div class="stat-value green">99.9%</div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <div>
+                    <div class="section-title">Trending Products</div>
+                    <div class="section-sub">Most popular this week</div>
+                </div>
+                <div class="live-pill">
+                    <div class="pulse-dot"></div>
+                    Live
+                </div>
+            </div>
+
+            <div class="product-grid" id="home-products"></div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon pink"><i class="fas fa-lock"></i></div>
+                    <h4>Secure Transactions</h4>
+                    <p>Military-grade encryption for all communications and payments. Zero-knowledge architecture.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon purple"><i class="fas fa-bolt"></i></div>
+                    <h4>Lightning Fast</h4>
+                    <p>Instant delivery confirmation and real-time tracking. Average order confirmation under 2 minutes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon green"><i class="fas fa-shield-alt"></i></div>
+                    <h4>Verified Vendors</h4>
+                    <p>Reputation-based system with verified seller badges. Every vendor background-checked.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCTS -->
+        <div class="page" id="page-products">
+            <div class="section-header" style="margin-bottom: 24px;">
+                <div>
+                    <div class="section-title">All Products</div>
+                    <div class="section-sub" id="products-count">Loading...</div>
+                </div>
+                <div class="live-pill">
+                    <div class="pulse-dot"></div>
+                    Live Updates
+                </div>
+            </div>
+            <div class="product-grid" id="all-products"></div>
+        </div>
+
+        <!-- ORDERS -->
+        <div class="page" id="page-orders">
+            <div class="section-header" style="margin-bottom: 24px;">
+                <div>
+                    <div class="section-title">My Orders</div>
+                    <div class="section-sub">Your order history</div>
+                </div>
+                <button class="btn-ghost" onclick="loadOrders()" style="padding: 8px 16px; font-size: 12px;">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            <div id="orders-container" class="orders-list"></div>
+        </div>
+
+        <footer>
+            <p>© 2026 ComicShop — Sua loja de quadrinhos favorita</p>
+            <div class="footer-links">
+                <a href="#">Termos</a>
+                <a href="#">Privacidade</a>
+                <a href="#">Suporte</a>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- ═══ Cart Drawer ═══ -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+        <div>
+            <div class="cart-title">Shopping Cart</div>
+            <div class="cart-count" id="cartCount">0 items</div>
+        </div>
+        <button class="modal-close" onclick="closeCart()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+        <div class="cart-total-row">
+            <span class="cart-total-label">Total</span>
+            <span class="cart-total-val" id="cartTotal">$0</span>
+        </div>
+        <button class="btn-block primary" onclick="openCheckout()">
+            <i class="fas fa-lock"></i> Secure Checkout
+        </button>
+    </div>
+</div>
+
+<!-- ═══ Login Modal ═══ -->
+<div class="modal-overlay" id="loginOverlay">
+    <div class="modal">
+        <button class="modal-close" onclick="closeLogin()"><i class="fas fa-times"></i></button>
+        <h2>Access Account</h2>
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tabSignin" onclick="switchAuthTab('signin')">Sign In</button>
+            <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Register</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="authEmail" placeholder="your@email.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="authPassword" placeholder="••••••••" autocomplete="current-password"
+                   onkeydown="if(event.key==='Enter') submitAuth()">
+        </div>
+        <div class="modal-actions">
+            <button class="btn-block primary" id="authSubmitBtn" onclick="submitAuth()">Sign In</button>
+        </div>
+        <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:12px; font-family: var(--font-mono);">
+            End-to-end encrypted &nbsp;·&nbsp; <i class="fas fa-lock" style="color:var(--green)"></i>
+        </p>
+    </div>
+</div>
+
+<!-- ═══ Checkout Modal ═══ -->
+<div class="modal-overlay" id="checkoutOverlay">
+    <div class="modal">
+        <button class="modal-close" onclick="closeCheckout()"><i class="fas fa-times"></i></button>
+        <h2>Checkout</h2>
+        <div class="encrypt-notice">
+            <i class="fas fa-lock"></i> Encrypted & anonymous transaction
+        </div>
+        <div class="form-group">
+            <label class="form-label">Delivery Address</label>
+            <input type="text" class="form-input" id="checkoutAddress" placeholder="Rua das Flores, 123 – São Paulo, SP">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Payment Method</label>
+            <select class="form-input" id="checkoutPayment">
+                <option value="bitcoin">₿ Bitcoin (BTC)</option>
+                <option value="monero">Ɱ Monero (XMR)</option>
+                <option value="ethereum">Ξ Ethereum (ETH)</option>
+                <option value="litecoin">Ł Litecoin (LTC)</option>
+            </select>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin: 16px 0; font-family:var(--font-mono);">
+            <span style="font-size:13px; color:var(--muted);">Order Total</span>
+            <span style="font-size:22px; font-weight:800; color:var(--pink);" id="checkoutTotal">$0</span>
+        </div>
+        <button class="btn-block primary" id="confirmOrderBtn" onclick="confirmOrder()">
+            <i class="fas fa-check"></i> Confirm Order
+        </button>
+    </div>
+</div>
+
+<!-- ═══ Success Modal ═══ -->
+<div class="modal-overlay" id="successOverlay">
+    <div class="modal" style="text-align:center;">
+        <div class="success-icon"><i class="fas fa-check"></i></div>
+        <h2>Order Confirmed!</h2>
+        <p style="color:var(--muted); font-size:13px; margin-bottom:4px;">Your order was placed successfully.</p>
+        <div class="order-summary" id="successSummary"></div>
+        <button class="btn-block primary" onclick="closeSuccess()" style="margin-top:4px;">
+            Continue Shopping
+        </button>
+    </div>
+</div>
+
+<!-- ═══ Toast container ═══ -->
+<div id="toast-container"></div>
+
+<!-- ═══ Scripts ═══ -->
+<script>
+// ── API Client (inline) ──────────────────────────────────────────────
+const STATIC_MODE = typeof window !== 'undefined' && (
+    window.location.protocol === 'file:' || window.location.hostname.endsWith('github.io')
+);
+const API_BASE_URL = (typeof window !== 'undefined' && window.location && !window.location.host.includes('file'))
+    ? `${window.location.protocol}//${window.location.host}/api`
+    : 'http://localhost:5000/api';
+
+class ComicShopAPI {
+    constructor() { this.token = localStorage.getItem('token'); }
+
+    setToken(token) {
+        this.token = token;
+        token ? localStorage.setItem('token', token) : localStorage.removeItem('token');
+    }
+
+    async _req(path, opts = {}) {
+        const headers = { 'Content-Type': 'application/json', ...opts.headers };
+        if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
+        const r = await fetch(`${API_BASE_URL}${path}`, { ...opts, headers });
+        return r.json();
+    }
+
+    async register(email, password) {
+        if (STATIC_MODE) return this.createDemoSession(email);
+        try {
+            const d = await this._req('/auth/register', { method: 'POST', body: JSON.stringify({ email, password }) });
+            if (d.token) { this.setToken(d.token); localStorage.setItem('user', JSON.stringify(d.user)); }
+            return d;
+        } catch (error) {
+            return this.createDemoSession(email);
+        }
+    }
+
+    async login(email, password) {
+        if (STATIC_MODE) return this.createDemoSession(email);
+        try {
+            const d = await this._req('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+            if (d.token) { this.setToken(d.token); localStorage.setItem('user', JSON.stringify(d.user)); }
+            return d;
+        } catch (error) {
+            return this.createDemoSession(email);
+        }
+    }
+
+    createDemoSession(email) {
+        const user = {
+            id: `demo-${email.toLowerCase()}`,
+            email: email.toLowerCase(),
+            username: email.split('@')[0],
+            balance: 1.0
+        };
+        this.setToken('demo-token');
+        localStorage.setItem('user', JSON.stringify(user));
+        return { user, token: 'demo-token' };
+    }
+
+    async getCurrentUser() { return this._req('/auth/me'); }
+
+    logout() { this.setToken(null); localStorage.removeItem('user'); }
+
+    async getProducts() { return this._req('/products'); }
+
+    async getOrders() {
+        if (STATIC_MODE) return { orders: state.orders, total: state.orders.length };
+        try {
+            return await this._req('/orders');
+        } catch (error) {
+            return { orders: state.orders, total: state.orders.length };
+        }
+    }
+
+    async createOrder(data) {
+        if (STATIC_MODE) {
+            return this.createDemoOrder(data);
+        }
+        try {
+            return await this._req('/orders', { method: 'POST', body: JSON.stringify(data) });
+        } catch (error) {
+            return this.createDemoOrder(data);
+        }
+    }
+
+    createDemoOrder(data) {
+        return {
+            order: {
+                ...data,
+                id: `DEMO-${Date.now()}`,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            }
+        };
+    }
+}
+
+const api = new ComicShopAPI();
+
+// ── State ──────────────────────────────────────────────────────────
+const state = {
+    user: null,
+    products: [],
+    cart: [],
+    orders: [],
+    authTab: 'signin'
+};
+
+// ── Toast ──────────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+    const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `<i class="fas ${icons[type]}"></i><span>${msg}</span>`;
+    document.getElementById('toast-container').appendChild(el);
+    setTimeout(() => el.remove(), 4200);
+}
+
+// ── Navigation ──────────────────────────────────────────────────────
+function navigateTo(page, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    else {
+        const all = document.querySelectorAll('.nav-item');
+        all.forEach(n => { if (n.textContent.trim().toLowerCase().startsWith(page)) n.classList.add('active'); });
+    }
+    if (page === 'products') renderAllProducts();
+    if (page === 'orders') loadOrders();
+    closeSidebar();
+}
+
+// ── Sidebar (mobile) ────────────────────────────────────────────────
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+    document.getElementById('sidebarBackdrop').classList.toggle('open');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('mobile-open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+}
+
+// ── User Menu ───────────────────────────────────────────────────────
+function toggleUserMenu() {
+    document.getElementById('userDropdown').classList.toggle('open');
+}
+function closeUserMenu() {
+    document.getElementById('userDropdown').classList.remove('open');
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.user-wrapper')) closeUserMenu();
+});
+
+// ── Auth ────────────────────────────────────────────────────────────
+function openLogin() { document.getElementById('loginOverlay').classList.add('open'); closeUserMenu(); }
+function closeLogin() { document.getElementById('loginOverlay').classList.remove('open'); clearAuthInputs(); }
+
+function clearAuthInputs() {
+    document.getElementById('authEmail').value = '';
+    document.getElementById('authPassword').value = '';
+}
+
+function switchAuthTab(tab) {
+    state.authTab = tab;
+    document.getElementById('tabSignin').classList.toggle('active', tab === 'signin');
+    document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+    document.getElementById('authSubmitBtn').textContent = tab === 'signin' ? 'Sign In' : 'Create Account';
+}
+
+async function submitAuth() {
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    if (!email || !password) { toast('Please fill in all fields', 'error'); return; }
+    if (password.length < 6) { toast('Password must be at least 6 characters', 'error'); return; }
+
+    const btn = document.getElementById('authSubmitBtn');
+    btn.classList.add('btn-loading');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
+    try {
+        const fn = state.authTab === 'signin' ? api.login.bind(api) : api.register.bind(api);
+        const res = await fn(email, password);
+        if (res.user) {
+            state.user = res.user;
+            saveState();
+            closeLogin();
+            updateUserUI();
+            toast(`Welcome${state.authTab === 'register' ? '' : ' back'}, ${state.user.username}!`, 'success');
+        } else {
+            toast(res.error || res.message || 'Authentication failed', 'error');
+        }
+    } catch (err) {
+        toast('Connection failed. Is the backend running?', 'error');
+    } finally {
+        btn.classList.remove('btn-loading');
+        btn.textContent = state.authTab === 'signin' ? 'Sign In' : 'Create Account';
+    }
+}
+
+function logout() {
+    api.logout();
+    state.user = null;
+    state.cart = [];
+    saveState();
+    updateUserUI();
+    updateCartUI();
+    closeUserMenu();
+    toast('Logged out successfully', 'info');
+}
+
+// ── Products ────────────────────────────────────────────────────────
+function renderStars(rating) {
+    return [1,2,3,4,5].map(i =>
+        `<span class="star${i <= Math.round(rating) ? ' filled' : ''}">★</span>`
+    ).join('');
+}
+
+function productCardHTML(p) {
+    const oos = !p.inStock;
+    return `
+        <div class="product-card">
+            <div class="product-thumb">
+                ${p.image || '💊'}
+                ${oos ? '<div class="out-of-stock-overlay"><span class="oos-badge">Out of Stock</span></div>' : ''}
+            </div>
+            <div class="product-body">
+                <div class="product-cat">${p.category || 'Product'}</div>
+                <div class="product-name">${p.name}</div>
+                <div class="stars">${renderStars(p.rating || 0)}<span class="rating-text">${p.rating || '—'}</span></div>
+                <div class="review-count">${p.reviews || 0} reviews</div>
+                <div class="product-footer">
+                    <span class="product-price">$${p.price}</span>
+                    <button class="add-btn" onclick="addToCart(${JSON.stringify(p.id)})" ${oos ? 'disabled' : ''} title="Add to cart">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function skeletonCards(n = 6) {
+    return Array(n).fill(`
+        <div class="product-card">
+            <div class="skeleton" style="height:130px;border-radius:0"></div>
+            <div style="padding:16px; display:flex; flex-direction:column; gap:10px;">
+                <div class="skeleton" style="height:10px; width:50%;"></div>
+                <div class="skeleton" style="height:14px; width:70%;"></div>
+                <div class="skeleton" style="height:10px; width:40%;"></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+                    <div class="skeleton" style="height:20px;width:60px;"></div>
+                    <div class="skeleton" style="height:34px;width:34px;border-radius:8px;"></div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function loadProducts() {
+    document.getElementById('home-products').innerHTML = skeletonCards(3);
+    document.getElementById('all-products').innerHTML = skeletonCards(6);
+    try {
+        const res = await api.getProducts();
+        if (res.products) {
+            state.products = res.products;
+        } else {
+            // Fallback data if backend offline
+            state.products = getDefaultProducts();
+        }
+    } catch (e) {
+        state.products = getDefaultProducts();
+        toast('Using demo data (backend offline)', 'info');
+    }
+    renderHomeProducts();
+    renderAllProducts();
+}
+
+function getDefaultProducts() {
+    return [
+        { id: 1, name: 'Guardiões da Galáxia #1', category: 'Marvel', price: 45, rating: 4.9, reviews: 312, inStock: true, image: '🚀' },
+        { id: 2, name: 'Batman: Ano Um', category: 'DC', price: 60, rating: 4.9, reviews: 218, inStock: true, image: '🦇' },
+        { id: 3, name: 'Akira Vol. 1', category: 'Mangá', price: 90, rating: 5.0, reviews: 156, inStock: true, image: '⚡' },
+        { id: 4, name: 'Homem-Aranha: De Volta ao Lar', category: 'Marvel', price: 75, rating: 4.6, reviews: 98, inStock: false, image: '🕷️' },
+        { id: 5, name: 'Sandman: Prelúdios e Noturnos', category: 'Vertigo', price: 85, rating: 4.8, reviews: 442, inStock: true, image: '🌙' },
+        { id: 6, name: 'One Piece Vol. 100', category: 'Mangá', price: 55, rating: 4.7, reviews: 87, inStock: true, image: '☠️' },
+    ];
+}
+
+function renderHomeProducts() {
+    const top3 = [...state.products].sort((a,b) => (b.rating||0)-(a.rating||0)).slice(0,3);
+    document.getElementById('home-products').innerHTML = top3.map(productCardHTML).join('');
+}
+
+function renderAllProducts() {
+    const q = (document.getElementById('searchInput').value || '').toLowerCase();
+    const filtered = state.products.filter(p =>
+        p.name.toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q)
+    );
+    document.getElementById('products-count').textContent = `${filtered.length} products available`;
+    document.getElementById('all-products').innerHTML = filtered.length
+        ? filtered.map(productCardHTML).join('')
+        : '<p style="color:var(--muted); font-family:var(--font-mono); font-size:13px; padding:20px 0;">No products found.</p>';
+}
+
+function filterProducts() { renderAllProducts(); }
+
+// ── Cart ────────────────────────────────────────────────────────────
+function addToCart(productId) {
+    if (!state.user) { openLogin(); toast('Sign in to add items to cart', 'info'); return; }
+    const p = state.products.find(x => x.id === productId);
+    if (!p || !p.inStock) return;
+    const ex = state.cart.find(i => i.id === productId);
+    if (ex) ex.quantity++;
+    else state.cart.push({ id: p.id, name: p.name, price: p.price, quantity: 1, image: p.image || '💊' });
+    saveState();
+    updateCartUI();
+    toast(`${p.name} added to cart`, 'success');
+}
+
+function removeFromCart(id) {
+    state.cart = state.cart.filter(i => i.id !== id);
+    saveState();
+    updateCartUI();
+    renderCartItems();
+}
+
+function setQty(id, qty) {
+    const item = state.cart.find(i => i.id === id);
+    if (!item) return;
+    if (qty < 1) { removeFromCart(id); return; }
+    item.quantity = qty;
+    saveState();
+    updateCartUI();
+    renderCartItems();
+}
+
+function cartTotal() { return state.cart.reduce((t, i) => t + i.price * i.quantity, 0); }
+
+function renderCartItems() {
+    const el = document.getElementById('cartItems');
+    const footer = document.getElementById('cartFooter');
+    if (state.cart.length === 0) {
+        el.innerHTML = `<div class="empty-cart"><i class="fas fa-shopping-cart"></i><p>Your cart is empty</p></div>`;
+        footer.style.display = 'none';
+        return;
+    }
+    footer.style.display = 'block';
+    el.innerHTML = state.cart.map(item => `
+        <div class="cart-item">
+            <div class="cart-item-emoji">${item.image}</div>
+            <div class="cart-item-info">
+                <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-price">$${item.price} each</div>
+            </div>
+            <div class="qty-controls">
+                <button class="qty-btn" onclick="setQty(${JSON.stringify(item.id)}, ${item.quantity - 1})">−</button>
+                <span class="qty-val">${item.quantity}</span>
+                <button class="qty-btn" onclick="setQty(${JSON.stringify(item.id)}, ${item.quantity + 1})">+</button>
+            </div>
+            <button class="remove-btn" onclick="removeFromCart(${JSON.stringify(item.id)})"><i class="fas fa-trash"></i></button>
+        </div>
+    `).join('');
+    document.getElementById('cartTotal').textContent = '$' + cartTotal().toFixed(2);
+    document.getElementById('cartCount').textContent = `${state.cart.length} item${state.cart.length !== 1 ? 's' : ''}`;
+}
+
+function updateCartUI() {
+    const total = state.cart.reduce((t, i) => t + i.quantity, 0);
+    const badge = document.getElementById('cartBadge');
+    badge.style.display = total > 0 ? 'flex' : 'none';
+    badge.textContent = total;
+}
+
+function openCart() {
+    renderCartItems();
+    document.getElementById('cartOverlay').classList.add('open');
+    document.getElementById('cartDrawer').classList.add('open');
+}
+
+function closeCart() {
+    document.getElementById('cartOverlay').classList.remove('open');
+    document.getElementById('cartDrawer').classList.remove('open');
+}
+
+// ── Checkout ────────────────────────────────────────────────────────
+function openCheckout() {
+    if (state.cart.length === 0) return;
+    document.getElementById('checkoutTotal').textContent = '$' + cartTotal().toFixed(2);
+    closeCart();
+    document.getElementById('checkoutOverlay').classList.add('open');
+}
+
+function closeCheckout() {
+    document.getElementById('checkoutOverlay').classList.remove('open');
+    document.getElementById('checkoutAddress').value = '';
+}
+
+async function confirmOrder() {
+    const address = document.getElementById('checkoutAddress').value.trim();
+    const payment = document.getElementById('checkoutPayment').value;
+    if (!address) { toast('Please enter a delivery address', 'error'); return; }
+
+    const btn = document.getElementById('confirmOrderBtn');
+    btn.classList.add('btn-loading');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+    const orderData = {
+        items: state.cart.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price })),
+        total: cartTotal(),
+        address,
+        paymentMethod: payment
+    };
+
+    try {
+        const res = await api.createOrder(orderData);
+        const order = res.order || { id: '#' + Date.now(), total: cartTotal(), paymentMethod: payment, status: 'pending', createdAt: new Date() };
+
+        state.orders.unshift(order);
+        state.cart = [];
+        saveState();
+        updateCartUI();
+        closeCheckout();
+
+        document.getElementById('successSummary').innerHTML = `
+            <div class="order-summary-row"><span class="order-summary-key">Order ID</span><span class="order-summary-val">${order.id}</span></div>
+            <div class="order-summary-row"><span class="order-summary-key">Total</span><span class="order-summary-val">$${Number(order.total).toFixed(2)}</span></div>
+            <div class="order-summary-row"><span class="order-summary-key">Payment</span><span class="order-summary-val">${(order.paymentMethod||payment).toUpperCase()}</span></div>
+            <div class="order-summary-row"><span class="order-summary-key">Status</span><span class="order-summary-val" style="color:var(--green)">CONFIRMED</span></div>
+        `;
+        document.getElementById('successOverlay').classList.add('open');
+        toast('Order placed successfully!', 'success');
+    } catch (err) {
+        toast('Order failed. Check backend connection.', 'error');
+    } finally {
+        btn.classList.remove('btn-loading');
+        btn.innerHTML = '<i class="fas fa-check"></i> Confirm Order';
+    }
+}
+
+function closeSuccess() {
+    document.getElementById('successOverlay').classList.remove('open');
+}
+
+// ── Orders page ──────────────────────────────────────────────────────
+async function loadOrders() {
+    const container = document.getElementById('orders-container');
+    if (!state.user) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-lock"></i>
+                <h3>Sign in to view orders</h3>
+                <p>Your order history will appear here</p>
+                <button class="btn-primary" style="margin-top:8px;" onclick="openLogin()">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = `<div style="padding:20px 0; color:var(--muted); font-family:var(--font-mono); font-size:13px;"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>`;
+
+    try {
+        const res = await api.getOrders();
+        const orders = res.orders || state.orders;
+
+        if (!orders || orders.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-receipt"></i>
+                    <h3>No orders yet</h3>
+                    <p>Your purchases will appear here</p>
+                </div>`;
+            return;
+        }
+
+        const statusClass = s => {
+            if (!s) return 'status-pending';
+            const m = { pending: 'status-pending', processing: 'status-processing', completed: 'status-completed', cancelled: 'status-cancelled' };
+            return m[s.toLowerCase()] || 'status-pending';
+        };
+
+        container.innerHTML = orders.map(o => `
+            <div class="order-card">
+                <div style="font-size:28px;">${o.items && o.items[0] ? (state.products.find(p=>p.id===o.items[0].id)||{image:'📦'}).image || '📦' : '📦'}</div>
+                <div class="order-info">
+                    <div class="order-id">Order ${o.id}</div>
+                    <div class="order-items">${o.items ? o.items.map(i => `${i.name} ×${i.quantity}`).join(', ') : 'Items'}</div>
+                    <div class="order-meta">${new Date(o.createdAt || Date.now()).toLocaleDateString('pt-BR')} · ${(o.paymentMethod||'').toUpperCase()}</div>
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                    <div class="order-total">$${Number(o.total).toFixed(2)}</div>
+                    <div class="status-badge ${statusClass(o.status)}">${o.status || 'pending'}</div>
+                </div>
+            </div>
+        `).join('');
+    } catch (err) {
+        if (state.orders.length > 0) {
+            container.innerHTML = state.orders.map(o => `...`).join('');
+        } else {
+            container.innerHTML = `<div class="empty-state"><i class="fas fa-wifi"></i><h3>Backend offline</h3><p>Start the backend to see orders</p></div>`;
+        }
+    }
+}
+
+// ── UI helpers ───────────────────────────────────────────────────────
+function updateUserUI() {
+    const btn = document.getElementById('userBtn');
+    const authItem = document.getElementById('authDropdownItem');
+
+    if (state.user) {
+        btn.textContent = (state.user.username || state.user.email || 'U')[0].toUpperCase();
+        document.getElementById('dropdownName').textContent = state.user.username || 'User';
+        document.getElementById('dropdownEmail').textContent = state.user.email || '';
+        authItem.innerHTML = '<i class="fas fa-sign-out-alt"></i> Sign Out';
+        authItem.className = 'dropdown-item danger';
+        authItem.onclick = logout;
+        document.getElementById('sidebarBalance').textContent = (state.user.balance || 0).toFixed(2) + ' BTC';
+    } else {
+        btn.textContent = 'L';
+        document.getElementById('dropdownName').textContent = 'Guest';
+        document.getElementById('dropdownEmail').textContent = 'Not signed in';
+        authItem.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+        authItem.className = 'dropdown-item';
+        authItem.onclick = openLogin;
+        document.getElementById('sidebarBalance').textContent = '—';
+    }
+}
+
+// ── Persistence ──────────────────────────────────────────────────────
+function saveState() {
+    localStorage.setItem('comicshop_state', JSON.stringify({ cart: state.cart, orders: state.orders }));
+}
+
+function loadState() {
+    try {
+        const s = localStorage.getItem('comicshop_state');
+        if (s) { const d = JSON.parse(s); state.cart = d.cart || []; state.orders = d.orders || []; }
+        const u = localStorage.getItem('user');
+        if (u) state.user = JSON.parse(u);
+    } catch (e) {}
+}
+
+// ── Init ─────────────────────────────────────────────────────────────
+loadState();
+updateUserUI();
+updateCartUI();
+loadProducts();
+
+// Close overlays on backdrop click
+document.getElementById('loginOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeLogin();
+});
+document.getElementById('checkoutOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeCheckout();
+});
+document.getElementById('successOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeSuccess();
+});
+</script>
+</body>
+</html>

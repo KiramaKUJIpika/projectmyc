@@ -17,7 +17,8 @@ app.use(express.json());
 
 // ── Serve frontend static files ───────────────────────────────────────
 // public/ is one level up from backend/
-app.use(express.static(path.join(__dirname, '..', 'public')));
+const publicPath = path.join(__dirname, 'public');
+app.use(express.static(publicPath));
 
 // ── API Routes ────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
@@ -37,7 +38,7 @@ app.get('/health', (req, res) => {
 
 // ── Catch-all: serve index.html for any non-API route ─────────────────
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+    res.sendFile(path.join(publicPath, 'index.html'));
 });
 
 // ── Start ─────────────────────────────────────────────────────────────
